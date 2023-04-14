@@ -3,9 +3,9 @@ clear
 cd ..
 cargo build --release
 cd samples
-rm PAINTING.BIN
-rm PALETTE.BIN
-rm painting.log
+rm *.BIN
+rm *.RGB
+rm *.log
 rm image2agon
 ls -l
 cp ../target/release/image2agon ./
@@ -15,12 +15,14 @@ hexdump -C PALETTE.BIN
 gedit painting.log &
 
 cd individual
+rm *.BIN
+rm *.RGB
+rm *.log
 ../image2agon \
- -b 1 -p 15 monochrome.png \
- -a sp seq08.png \
- -a sp seq16.png \
- -a sp seq32.png \
- -a sp seq64.png  >individual.log
+ -b 1 monochrome.png \
+ seq08.png \
+ seq16.png \
+ seq32.png \
+ seq64.png  >individual.log
 gedit individual.log &
 cd ..
-

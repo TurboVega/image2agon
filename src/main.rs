@@ -52,8 +52,7 @@ struct FileParameters {
     pub path: String,
     pub size: usize,
     pub max_colors: usize,
-    pub colors: HashMap<Rgb<u8>, u8>,
-    pub binary: Vec<u8>
+    pub colors: HashMap<Rgb<u8>, u8>
 }
 
 impl FileParameters {
@@ -67,8 +66,7 @@ impl FileParameters {
             path: params.path.clone(),
             size: 0,
             max_colors: 0,
-            colors: HashMap::new(),
-            binary: vec![]
+            colors: HashMap::new()
         }
     }
 }
@@ -150,7 +148,7 @@ fn main() {
             } else if expect.bpp {
                 match arg.parse::<u8>() {
                     Ok(number) => {
-                        if number == 1 || number == 2 || number == 4 || number == 8 {
+                        if number == 1 || number == 2 || number == 3 || number == 4 || number == 6 {
                             params.bpp = number;
                             expect.expect_file();    
                         } else {
@@ -222,13 +220,19 @@ fn main() {
                         let mut width = params.width;
                         match params.bpp {
                             1 => {
-                                width = (width + 7) / 8;
+                                width = (width + 7) / 8; // 8 pixels per byte
                             },
                             2 => {
-                                width = (width + 3) / 4;
+                                width = (width + 3) / 4; // 4 pixels per byte
+                            },
+                            3 => {
+                                width = (width + 1) / 2; // 2 pixels per byte
                             },
                             4 => {
-                                width = (width + 1) / 2;
+                                width = (width + 1) / 2; // 2 pixels per byte
+                            },
+                            6 => {
+                                // 1 pixel per byte
                             },
                             _ => {}
                         }
@@ -276,15 +280,21 @@ fn main() {
                                     let mut width = params.width;
                                     match params.bpp {
                                         1 => {
-                                            width = (width + 7) / 8;
+                                            width = (width + 7) / 8; // 8 pixels per byte
                                         },
                                         2 => {
-                                            width = (width + 3) / 4;
+                                            width = (width + 3) / 4; // 4 pixels per byte
+                                        },
+                                        3 => {
+                                            width = (width + 1) / 2; // 2 pixels per byte
                                         },
                                         4 => {
-                                            width = (width + 1) / 2;
+                                            width = (width + 1) / 2; // 2 pixels per byte
                                         },
-                                                    _ => {}
+                                        6 => {
+                                            // 1 pixel per byte
+                                        },
+                                        _ => {}
                                     }
                                     params.size = width * params.height;
                                                                         
@@ -311,8 +321,8 @@ fn main() {
         // Determine the maximum number of colors, not including transparent
         match img_file.bpp {
             0 => {
-                img_file.bpp = 8;
-                img_file.max_colors = 239;
+                img_file.bpp = 6;
+                img_file.max_colors = 63;
             },
             1 => {
                 img_file.max_colors = 1;
@@ -320,11 +330,14 @@ fn main() {
             2 => {
                 img_file.max_colors = 3;
             },
+            3 => {
+                img_file.max_colors = 7;
+            },
             4 => {
                 img_file.max_colors = 15;
             },
-            8 => {
-                img_file.max_colors = 239;
+            6 => {
+                img_file.max_colors = 63;
             },
             _ => {}
         }
@@ -345,9 +358,9 @@ fn main() {
                 for y in 0..height {
                     for x in 0..width {
                         let pixel = rgba.get_pixel(x, y);
-                        let r = pixel[IMG_R] >> 4;
-                        let g = pixel[IMG_G] >> 4;
-                        let b = pixel[IMG_B] >> 4;
+                        let r = pixel[IMG_R] >> 6;
+                        let g = pixel[IMG_G] >> 6;
+                        let b = pixel[IMG_B] >> 6;
                         let color = Rgb::<u8>([r, g, b]);
                         if !img_file.colors.contains_key(&color) {
                             if img_file.colors.len() >= img_file.max_colors {
@@ -365,11 +378,11 @@ fn main() {
                 for y in 0..height {
                     for x in 0..width {
                         let pixel = rgba.get_pixel(x, y);
-                        let a = pixel[IMG_A] >> 4;
+                        let a = pixel[IMG_A] >> 6;
                         if a > 0 {
-                            let r = pixel[IMG_R] >> 4;
-                            let g = pixel[IMG_G] >> 4;
-                            let b = pixel[IMG_B] >> 4;
+                            let r = pixel[IMG_R] >> 6;
+                            let g = pixel[IMG_G] >> 6;
+                            let b = pixel[IMG_B] >> 6;
                             let color = Rgb::<u8>([r, g, b]);
                             if !img_file.colors.contains_key(&color) {
                                 if img_file.colors.len() >= img_file.max_colors {
@@ -399,12 +412,12 @@ fn main() {
     let mut palette_map: HashMap<Rgb<u8>, Vec<u8>> = HashMap::new();
     let mut palette_array: Vec<Option<Rgb::<u8>>> = vec![];
 
-    for _index in 0..256 {
+    for _index in 0..64 {
         palette_array.push(None);
     }
 
     // Find indexes for colors.
-    let next_index: usize = 16;
+    let next_index: usize = 1;
     for img_file in &mut files {
         for color in img_file.colors.keys() {
             if !palette_map.contains_key(color) {
@@ -429,7 +442,7 @@ fn main() {
 
     // Dump the palette to the console, for documentation purposes.
     println!("; Palette entries by index:");
-    println!(";             Agon      Dec Hex:  R G B");
+    println!(";           Agon            Dec Hex:   R G B");
     println!(";");
     println!("begin_palette_table:");
     for index in 0..palette_array.len() {
@@ -444,15 +457,18 @@ fn main() {
                 " (FREE)"
             }
         };
-        println!("    .byte    ${:x}{:x},$0{:x}  ; {:03} ${:02x}:  {:x} {:x} {:x}{}",
-            color[1], color[2], color[0], // G B R
+        let wcolor = widen_color(&color);
+        println!("    DB    0{:02X}H,0{:02X}H,0{:02X}H  ; {:03} 0{:02x}H:  {:x} {:x} {:x}{}",
+            wcolor[0], wcolor[1], wcolor[2], // R G B
             index, index,
             color[0], color[1], color[2], // R G B
             free);
     }
     println!("end_palette_table:\n");
 
-    // For each PNG file, convert its pixels to palette indexes, and write to output file.
+    // For each PNG file, convert its pixels to palette indexes, and write to indexed output file.
+    // Also, write the widened RGB colors to a separate file.
+    //
     for img_file in &mut files {
         if img_file.vapor || img_file.no_output {
             continue; // skip it
@@ -487,8 +503,7 @@ fn main() {
             image::DynamicImage::ImageRgb8(rgb) => {
                 // Convert pixel colors into indexes.
                 let mut output_data: Vec<u8> = vec![];
-                output_data.push(0); // dummy address LO
-                output_data.push(0); // dummy address HI
+                let mut output_data_rgb: Vec<u8> = vec![];
 
                 for out_y in out_start_y..out_end_y {
                     let mut bits_used: u8 = 0;
@@ -498,15 +513,17 @@ fn main() {
                     if img_y < 0 || img_y >= img_height {
                         for _out_x in out_start_x..out_end_x {
                             // output transparent color index (zero)
-                            if img_file.bpp == 8 {
+                            output_data_rgb.push(0);
+                            output_data_rgb.push(0);
+                            output_data_rgb.push(0);
+
+                            if img_file.bpp > 4 {
                                 output_data.push(0);
-                                img_file.binary.push(0);
                             } else {
                                 output_byte <<= img_file.bpp;
                                 bits_used += img_file.bpp;
-                                if bits_used >= 8 {
+                                if bits_used >= 8 || 8 - bits_used < img_file.bpp {
                                     output_data.push(output_byte);
-                                    img_file.binary.push(output_byte);
                                     output_byte = 0;
                                     bits_used = 0;
                                 }    
@@ -517,39 +534,44 @@ fn main() {
                             let img_x = img_center_x - (out_center_x - out_x);
                             if img_x < 0 || img_x >= img_width {
                                 // output transparent color index (zero)
-                                if img_file.bpp == 8 {
+                                output_data_rgb.push(0);
+                                output_data_rgb.push(0);
+                                output_data_rgb.push(0);
+
+                                if img_file.bpp > 4 {
                                     output_data.push(0);
-                                    img_file.binary.push(0);
                                 } else {
                                     output_byte <<= img_file.bpp;
                                     bits_used += img_file.bpp;
-                                    if bits_used >= 8 {
+                                    if bits_used >= 8 || 8 - bits_used < img_file.bpp {
                                         output_data.push(output_byte);
-                                        img_file.binary.push(output_byte);
                                         output_byte = 0;
                                         bits_used = 0;
                                     }    
                                 }
                             } else {
                                 let pixel = rgb.get_pixel(img_x as u32, img_y as u32);
-                                let r = pixel[IMG_R] >> 4;
-                                let g = pixel[IMG_G] >> 4;
-                                let b = pixel[IMG_B] >> 4;
+                                let r = pixel[IMG_R] >> 6;
+                                let g = pixel[IMG_G] >> 6;
+                                let b = pixel[IMG_B] >> 6;
                                 let color = Rgb::<u8>([r, g, b]);
+
+                                let wcolor = widen_color(&color);
+                                output_data_rgb.push(wcolor[0]);
+                                output_data_rgb.push(wcolor[1]);
+                                output_data_rgb.push(wcolor[2]);
 
                                 let indexes = palette_map.get(&color).unwrap();
                                 let index = indexes[0];
 
                                 // output some color index
-                                if img_file.bpp == 8 {
+                                if img_file.bpp > 4 {
                                     output_data.push(index);
-                                    img_file.binary.push(index);
                                 } else {
                                     output_byte = (output_byte << img_file.bpp) | index;
                                     bits_used += img_file.bpp;
-                                    if bits_used >= 8 {
+                                    if bits_used >= 8 || 8 - bits_used < img_file.bpp {
                                         output_data.push(output_byte);
-                                        img_file.binary.push(output_byte);
                                         output_byte = 0;
                                         bits_used = 0;
                                     }    
@@ -564,7 +586,6 @@ fn main() {
                             bits_used += img_file.bpp;
                         }
                         output_data.push(output_byte);
-                        img_file.binary.push(output_byte);
                     }
                 }
 
@@ -585,12 +606,29 @@ fn main() {
                         println!("ERROR: Cannot open output file ({}): {}", uc_path, err.to_string());
                     }
                 }
+
+                // Write the output RGB data to a file.
+                let uc_path = upcase_filename(&img_file.path) + ".RGB";
+                match fs::File::create(uc_path.clone()) {
+                    Ok(mut file) => {
+                        match file.write_all(&output_data_rgb[..]) {
+                            Ok(()) => {
+                                println!("Wrote RGB file ({}) as {} bytes.", uc_path, output_data_rgb.len());
+                            },
+                            Err(err) => {
+                                println!("ERROR: Cannot write RGB output file ({}): {}", uc_path, err.to_string());
+                            }
+                        }
+                    },
+                    Err(err) => {
+                        println!("ERROR: Cannot open RGB output file ({}): {}", uc_path, err.to_string());
+                    }
+                }
             },
             image::DynamicImage::ImageRgba8(rgba) => {
                 // Convert pixel colors into indexes.
                 let mut output_data: Vec<u8> = vec![];
-                output_data.push(0); // dummy address LO
-                output_data.push(0); // dummy address HI
+                let mut output_data_rgb: Vec<u8> = vec![];
 
                 for out_y in out_start_y..out_end_y {
                     let mut bits_used: u8 = 0;
@@ -600,15 +638,17 @@ fn main() {
                     if img_y < 0 || img_y >= img_height {
                         for _out_x in out_start_x..out_end_x {
                             // output transparent color index (zero)
-                            if img_file.bpp == 8 {
+                            output_data_rgb.push(0);
+                            output_data_rgb.push(0);
+                            output_data_rgb.push(0);
+
+                            if img_file.bpp > 4 {
                                 output_data.push(0);
-                                img_file.binary.push(0);
                             } else {
                                 output_byte <<= img_file.bpp;
                                 bits_used += img_file.bpp;
-                                if bits_used >= 8 {
+                                if bits_used >= 8 || 8 - bits_used < img_file.bpp {
                                     output_data.push(output_byte);
-                                    img_file.binary.push(output_byte);
                                     output_byte = 0;
                                     bits_used = 0;
                                 }    
@@ -619,56 +659,63 @@ fn main() {
                             let img_x = img_center_x - (out_center_x - out_x);
                             if img_x < 0 || img_x >= img_width {
                                 // output transparent color index (zero)
-                                if img_file.bpp == 8 {
+                                output_data_rgb.push(0);
+                                output_data_rgb.push(0);
+                                output_data_rgb.push(0);
+
+                                if img_file.bpp > 4 {
                                     output_data.push(0);
-                                    img_file.binary.push(0);
                                 } else {
                                     output_byte <<= img_file.bpp;
                                     bits_used += img_file.bpp;
-                                    if bits_used >= 8 {
+                                    if bits_used >= 8 || 8 - bits_used < img_file.bpp {
                                         output_data.push(output_byte);
-                                        img_file.binary.push(output_byte);
                                         output_byte = 0;
                                         bits_used = 0;
                                     }    
                                 }
                             } else {
                                 let pixel = rgba.get_pixel(img_x as u32, img_y as u32);
-                                let a = pixel[IMG_A] >> 4;
+                                let a = pixel[IMG_A] >> 6;
                                 if a > 0 {
-                                    let r = pixel[IMG_R] >> 4;
-                                    let g = pixel[IMG_G] >> 4;
-                                    let b = pixel[IMG_B] >> 4;
+                                    let r = pixel[IMG_R] >> 6;
+                                    let g = pixel[IMG_G] >> 6;
+                                    let b = pixel[IMG_B] >> 6;
                                     let color = Rgb::<u8>([r, g, b]);
+    
+                                    let wcolor = widen_color(&color);
+                                    output_data_rgb.push(wcolor[0]);
+                                    output_data_rgb.push(wcolor[1]);
+                                    output_data_rgb.push(wcolor[2]);
     
                                     let indexes = palette_map.get(&color).unwrap();
                                     let index = indexes[0];
        
                                     // output some color index
-                                    if img_file.bpp == 8 {
+                                    if img_file.bpp > 4 {
                                         output_data.push(index);
-                                        img_file.binary.push(index);
                                     } else {
                                         output_byte = (output_byte << img_file.bpp) | index;
                                         bits_used += img_file.bpp;
-                                        if bits_used >= 8 {
+                                        if bits_used >= 8 || 8 - bits_used < img_file.bpp {
                                             output_data.push(output_byte);
-                                            img_file.binary.push(output_byte);
                                             output_byte = 0;
                                             bits_used = 0;
                                         }    
                                     }
                                 } else {
                                     // output transparent color index (zero)
-                                    if img_file.bpp == 8 {
+                                    output_data_rgb.push(0);
+                                    output_data_rgb.push(0);
+                                    output_data_rgb.push(0);
+
+                                    if img_file.bpp > 4 {
                                         output_data.push(0);
-                                        img_file.binary.push(0);
                                     } else {
                                         output_byte <<= img_file.bpp;
                                         bits_used += img_file.bpp;
-                                        if bits_used >= 8 {
+                                        if bits_used >= 8 || 8 - bits_used < img_file.bpp {
                                             output_data.push(output_byte);
-                                            img_file.binary.push(output_byte);
                                             output_byte = 0;
                                             bits_used = 0;
                                         }    
@@ -684,7 +731,6 @@ fn main() {
                             bits_used += img_file.bpp;
                         }
                         output_data.push(output_byte);
-                        img_file.binary.push(output_byte);
                     }
                 }
 
@@ -703,6 +749,24 @@ fn main() {
                     },
                     Err(err) => {
                         println!("ERROR: Cannot open output file ({}): {}", uc_path, err.to_string());
+                    }
+                }
+
+                // Write the output RGB data to a file.
+                let uc_path = upcase_filename(&img_file.path) + ".RGB";
+                match fs::File::create(uc_path.clone()) {
+                    Ok(mut file) => {
+                        match file.write_all(&output_data_rgb[..]) {
+                            Ok(()) => {
+                                println!("Wrote RGB file ({}) as {} bytes.", uc_path, output_data_rgb.len());
+                            },
+                            Err(err) => {
+                                println!("ERROR: Cannot write RGB output file ({}): {}", uc_path, err.to_string());
+                            }
+                        }
+                    },
+                    Err(err) => {
+                        println!("ERROR: Cannot open RGB output file ({}): {}", uc_path, err.to_string());
                     }
                 }
             },
@@ -719,11 +783,12 @@ fn main() {
     for index in 0..palette_array.len() {
         match palette_array[index] {
             Some(color) => {
-                // Output: [ggggbbbb] [----rrrr]
-                palette_bytes.push((color[1]<<4)|color[2]); // G B
                 palette_bytes.push(color[0]); // R
+                palette_bytes.push(color[1]); // G
+                palette_bytes.push(color[2]); // B
             },
             None => {
+                palette_bytes.push(0);
                 palette_bytes.push(0);
                 palette_bytes.push(0);
             }
@@ -769,9 +834,9 @@ fn upcase_filename(path: &str) -> String {
 }
 
 fn show_memory_map(files: &mut Vec<FileParameters>) {
-    println!("\nRAM Address Arrangement\n");
-    println!("Start  End    Size  Width Height Path/Name");
-    println!("------ ------ ----- ----- ------ ----------------------------------");
+    println!("\nRelative Memory Map\n");
+    println!("Start  End    Size   Width Height Path/Name");
+    println!("------ ------ ------ ----- ------ ----------------------------------");
 
     let mut address: usize = 0;
     loop {
@@ -787,7 +852,7 @@ fn show_memory_map(files: &mut Vec<FileParameters>) {
         }
 
         let last_address = address + file.size - 1;
-        println!("${:05x} ${:05x} {:5} {:5} {:5}  {}",
+        println!("{:05x}H {:05x}H {:6} {:5} {:5}  {}",
             address,
             last_address,
             file.size,
@@ -798,4 +863,12 @@ fn show_memory_map(files: &mut Vec<FileParameters>) {
         files.remove(0);
         address += file.size;
     }
+}
+
+fn widen_color(color: &Rgb<u8>) -> Rgb<u8> {
+    Rgb([widen_component(color[0]), widen_component(color[1]), widen_component(color[2])])
+}
+
+fn widen_component(component: u8) -> u8 {
+    component << 6 | component << 4 | component << 2 | component
 }
