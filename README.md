@@ -6,7 +6,7 @@ This document is for version V1.0 of the program.
 V1.0 - initial upload<br>
 
 NOTE: The "prepsample.sh" script in the "samples" subdirectory has been renamed to
-"prepsample_linux.sh", and a new "prepsample_windows.sh" script has been added.
+"prepsample_linux.sh", and a new "prepsample_windows.bat" script has been added.
 The "prepsample_linux.sh" should work on a Mac, as well.
 
 This program converts PNG file data into binary data for use on the
