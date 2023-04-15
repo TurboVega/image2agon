@@ -5,6 +5,10 @@ This document is for version V1.0 of the program.
 
 V1.0 - initial upload<br>
 
+NOTE: The "prepsample.sh" script in the "samples" subdirectory has been renamed to
+"prepsample_linux.sh", and a new "prepsample_windows.sh" script has been added.
+The "prepsample_linux.sh" should work on a Mac, as well.
+
 This program converts PNG file data into binary data for use on the
 AgonLight (TM) retro computer. It reads multiple PNG files, combines their needed
 color palettes, and outputs palette entries in both text and binary, plus it outputs binary pixel data (palette indexes and also color values). Additionally,
@@ -94,7 +98,7 @@ processed using "-w 320 -h 240" as the command parameters (note the spaces), to 
 ./image2agon -w 320 -h 240 painting.png >painting.log
 ```
 
-There is a sample script called "prepsample.sh" in the "samples" subdirectory. It executes the above command line, as well as the one
+There is a sample script called "prepsample_linux.sh" in the "samples" subdirectory. It executes the above command line, as well as the one
 shown further below.
 
 The output image can be displayed on the Agon using the following steps:
@@ -106,7 +110,7 @@ The output image can be displayed on the Agon using the following steps:
 Another example illustrates specifying individual files, rather than directories.
 
 The "individual" sample directory may be processed like this (as shown
-in the "prepsample.sh" script):
+in the "prepsample_linux.sh" script):
 
 ```
 ../image2agon \

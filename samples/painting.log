@@ -7,21 +7,21 @@ File painting.png has 15 unique colors (maximum is 63).
 ;
 begin_palette_table:
     DB    000H,000H,000H  ; 000 000H:  0 0 0 (FREE)
-    DB    0AAH,000H,000H  ; 001 001H:  2 0 0
+    DB    0FFH,000H,000H  ; 001 001H:  3 0 0
     DB    055H,0FFH,000H  ; 002 002H:  1 3 0
-    DB    055H,0AAH,000H  ; 003 003H:  1 2 0
-    DB    055H,000H,000H  ; 004 004H:  1 0 0
-    DB    000H,055H,000H  ; 005 005H:  0 1 0
+    DB    000H,0AAH,000H  ; 003 003H:  0 2 0
+    DB    0AAH,0AAH,000H  ; 004 004H:  2 2 0
+    DB    000H,000H,0FFH  ; 005 005H:  0 0 3
     DB    0AAH,0AAH,055H  ; 006 006H:  2 2 1
-    DB    000H,000H,000H  ; 007 007H:  0 0 0
-    DB    000H,000H,0FFH  ; 008 008H:  0 0 3
-    DB    000H,0FFH,000H  ; 009 009H:  0 3 0
-    DB    0FFH,000H,000H  ; 010 00aH:  3 0 0
-    DB    0AAH,0AAH,000H  ; 011 00bH:  2 2 0
-    DB    0FFH,055H,000H  ; 012 00cH:  3 1 0
-    DB    0AAH,055H,000H  ; 013 00dH:  2 1 0
-    DB    000H,0AAH,000H  ; 014 00eH:  0 2 0
-    DB    055H,000H,0FFH  ; 015 00fH:  1 0 3
+    DB    000H,0FFH,000H  ; 007 007H:  0 3 0
+    DB    0AAH,055H,000H  ; 008 008H:  2 1 0
+    DB    055H,0AAH,000H  ; 009 009H:  1 2 0
+    DB    000H,055H,000H  ; 010 00aH:  0 1 0
+    DB    0AAH,000H,000H  ; 011 00bH:  2 0 0
+    DB    055H,000H,0FFH  ; 012 00cH:  1 0 3
+    DB    000H,000H,000H  ; 013 00dH:  0 0 0
+    DB    055H,000H,000H  ; 014 00eH:  1 0 0
+    DB    0FFH,055H,000H  ; 015 00fH:  3 1 0
     DB    000H,000H,000H  ; 016 010H:  0 0 0 (FREE)
     DB    000H,000H,000H  ; 017 011H:  0 0 0 (FREE)
     DB    000H,000H,000H  ; 018 012H:  0 0 0 (FREE)
