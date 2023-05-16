@@ -1,13 +1,17 @@
 # image2agon
 Converts PNG files to binary data for AgonLight (TM) usage.
 
-This document is for version V1.0 of the program.
+This document is for version V1.1 of the program.
 
+V1.1 - output 8-bit data as an option<br>
 V1.0 - initial upload<br>
 
-NOTE: The "prepsample.sh" script in the "samples" subdirectory has been renamed to
-"prepsample_linux.sh", and a new "prepsample_windows.bat" script has been added.
-The "prepsample_linux.sh" should work on a Mac, as well.
+There is a new binary output file format. It has 8 bits per pixel. The lower 6 bits (values 0x00 to 0x3F) represent
+color information, and the upper 2 bits (values 0x00, 0x40, 0x80, and 0xC0) represent transparency (i.e., 4 levels of
+alpha channel). A fully transparent pixel has
+an alpha value of 0 (stored as 0x00), while a fully
+opaque pixel has an alpha value of 3 (stored as 0xC0). When the output file has 8 bits per
+pixel, no palette is output, because each pixel has the full range of possible colors.
 
 This program converts PNG file data into binary data for use on the
 AgonLight (TM) retro computer. It reads multiple PNG files, combines their needed
@@ -15,11 +19,15 @@ color palettes, and outputs palette entries in both text and binary, plus it out
 the program arranges a simple memory map, and outputs that information,
 which may be helpful in loading the binary data into RAM.
 
+NOTE: The "prepsample.sh" script in the "samples" subdirectory has been renamed to
+"prepsample_linux.sh", and a new "prepsample_windows.bat" script has been added.
+The "prepsample_linux.sh" should work on a Mac, as well.
+
 NOTE: The memory map is presently based on the <i>packed-pixel</i> output,
 not on the <i>RGB</i> ("widened" colors) output. That may change in
 the future if needed.
 
-NOTE: Even though the program can emit 1, 2, 3, 4, or 6 bits-per-pixel in the <i>output</i> for Agon, the <i>input</i> PNG files may contain 24-bit RGB or 32-bit RGBA data. The program does not expect the PNG file to be
+NOTE: Even though the program can emit 1, 2, 3, 4, 6, or 8 bits-per-pixel in the <i>output</i> for Agon, the <i>input</i> PNG files may contain 24-bit RGB or 32-bit RGBA data. The program does not expect the PNG file to be
 an indexed file (i.e., it should not have its own color palette).
 <br><br>
 Besides the <i>packed-pixel</i> output, the program
@@ -31,7 +39,7 @@ red, green, and blue, and the colors are "widened", as follows:
 * Color component value of 2 is output as AAH.
 * Color component value of 3 is output as FFH.
 
-The output palette will always be a set of 64 (or less) 6-bit colors,
+The output palette, if any, will always be a set of 64 (or less) 6-bit colors,
 meaning that it represents (up to) 63 colors out of a set of 64 possible
 colors. Color <i>index</i> 0 always represents transparency.
 That does not prevent using the color black (RGB(0,0,0)) in one of
@@ -78,8 +86,8 @@ For a PNG file (in a directory or specific), 'height' is given in pixels.
 'b' and '-bpp' are synonyms<br>
 This may be used to specify the number of bits per pixel in the output binary
 file, which provides the intended range of color indexes (1: 2 colors, 2: 4
-colors, 3: 8 colors, 4: 16 colors, 6: 64 colors). The default value is 6, for 64 colors.
-As always, color index #0 means transparent, so the actual number of unique colors is
+colors, 3: 8 colors, 4: 16 colors, 6: 64 colors, 8: 64 colors plus transparency). The default value is 8.<br><br>
+Unless outputting 8 bits per pixel, color index #0 means transparent, so the actual number of unique colors is
 one less than the range might imply.<br>
 <br>
 '-n' and '-nooutput' are synonymns<br>
@@ -191,14 +199,18 @@ the color components by 6 (i.e., divide by 64), to yield a 6-bit color from the 
 This implies that detail may be lost, if the original image had non-zero
 values in the least significant 6 bits of any color component of any pixel.
 
-The overall processing is as follows:
+When 8-bit output is used, if the input file does not have an alpha channel, then each pixel will have its upper 2 bits cleared (to zero), because transparency is irrelevant. If
+the input file does have an alpha channel, then the upper 2 bits of the alpha values are
+copied to the upper 2 bits of the output pixels.
+
+The overall processing is as follows, but palette-related items do not apply when the output is 8 bits per pixel:<br>
 * Obtain a list of all files to process.
 * Read all files.
 * Determine how many unique 6-bit colors are used in ALL files together.
 * Organize a new color palette (index 0 means transparent; indexes 1..63 mean color).
 * Output palette information as binary data.
 * Output palette information as source text.
-* Output image data as binary palette indexes, one index per pixel.
+* Output image data as binary palette indexes, one index per pixel, or as binary pixel data, one pixel per byte, with transparency (if applicable).
 * Output image data as binary RGB values, using widened colors.
 * Compute and output memory map as text.
 

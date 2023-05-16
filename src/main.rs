@@ -115,7 +115,7 @@ impl Expectations {
 }
 
 fn main() {
-    println!("Image to Agon (PNG-to-Agon-binary file convertor) V1.0");
+    println!("Image to Agon (PNG-to-Agon-binary file convertor) V1.1");
 
     // Determine which directories to use.
     let mut directories: Vec<DirParameters> = vec![];
@@ -168,7 +168,8 @@ fn main() {
             } else if expect.bpp {
                 match arg.parse::<u8>() {
                     Ok(number) => {
-                        if number == 1 || number == 2 || number == 3 || number == 4 || number == 6 {
+                        if number == 1 || number == 2 || number == 3 ||
+                            number == 4 || number == 6 || number == 8 {
                             params.bpp = number;
                             expect.expect_file();    
                         } else {
@@ -210,7 +211,7 @@ fn main() {
     for directory in &mut directories {
         // Validate certain options.
         if directory.bpp == 0 {
-            directory.bpp = 6;
+            directory.bpp = 8;
         }
 
         // Skip virtual data, as there is no directory or file.
@@ -252,6 +253,9 @@ fn main() {
                                 width = (width + 1) / 2; // 2 pixels per byte
                             },
                             6 => {
+                                // 1 pixel per byte
+                            },
+                            8 => {
                                 // 1 pixel per byte
                             },
                             _ => {}
@@ -314,6 +318,9 @@ fn main() {
                                         6 => {
                                             // 1 pixel per byte
                                         },
+                                        8 => {
+                                            // 1 pixel per byte
+                                        },
                                         _ => {}
                                     }
                                     params.size = width * params.height;
@@ -341,8 +348,8 @@ fn main() {
         // Determine the maximum number of colors, not including transparent
         match img_file.bpp {
             0 => {
-                img_file.bpp = 6;
-                img_file.max_colors = 63;
+                img_file.bpp = 8;
+                img_file.max_colors = 64;
             },
             1 => {
                 img_file.max_colors = 1;
@@ -358,6 +365,9 @@ fn main() {
             },
             6 => {
                 img_file.max_colors = 63;
+            },
+            8 => {
+                img_file.max_colors = 64;
             },
             _ => {}
         }
@@ -388,8 +398,13 @@ fn main() {
                                     img_file.path, img_file.max_colors);
                                 return;
                             }
-                            let index = (img_file.colors.len() + 1) as u8;
-                            img_file.colors.insert(color, index);
+                            if img_file.bpp == 8 {
+                                let index = (r<<4)|(g<<2)|b;
+                                img_file.colors.insert(color, index);    
+                            } else {
+                                let index = (img_file.colors.len() + 1) as u8;
+                                img_file.colors.insert(color, index);    
+                            }
                         }
                     }
                 }
@@ -410,8 +425,13 @@ fn main() {
                                         img_file.path, img_file.max_colors);
                                     return;
                                 }
-                                let index = (img_file.colors.len() + 1) as u8;
-                                img_file.colors.insert(color, index);
+                                if img_file.bpp == 8 {
+                                    let index = (r<<4)|(g<<2)|b;
+                                    img_file.colors.insert(color, index);    
+                                } else {
+                                    let index = (img_file.colors.len() + 1) as u8;
+                                    img_file.colors.insert(color, index);    
+                                }
                             }
                         }
                     }
@@ -437,8 +457,10 @@ fn main() {
     }
 
     // Find indexes for colors.
+    let mut dump_palette = false;
     let next_index: usize = 1;
     for img_file in &mut files {
+        dump_palette |= img_file.bpp != 8;
         for color in img_file.colors.keys() {
             if !palette_map.contains_key(color) {
                 let mut found = false;
@@ -457,36 +479,38 @@ fn main() {
                     return;
                 }
             }        
+        }    
+    }
+
+    if dump_palette {
+        // Dump the palette to the console, for documentation purposes.
+        println!("; Palette entries by index:");
+        println!(";           Agon            Dec Hex:   R G B");
+        println!(";");
+        println!("begin_palette_table:");
+        for index in 0..palette_array.len() {
+            let color: Rgb<u8>;        
+            let free = match palette_array[index] {
+                Some(c) => {
+                    color = c.clone();
+                    ""
+                },
+                None => {
+                    color = Rgb::<u8>([0,0,0]); // black
+                    " (FREE)"
+                }
+            };
+            let wcolor = widen_color(&color);
+            println!("    DB    0{:02X}H,0{:02X}H,0{:02X}H  ; {:03} 0{:02x}H:  {:x} {:x} {:x}{}",
+                wcolor[0], wcolor[1], wcolor[2], // R G B
+                index, index,
+                color[0], color[1], color[2], // R G B
+                free);
         }
+        println!("end_palette_table:\n");
     }
 
-    // Dump the palette to the console, for documentation purposes.
-    println!("; Palette entries by index:");
-    println!(";           Agon            Dec Hex:   R G B");
-    println!(";");
-    println!("begin_palette_table:");
-    for index in 0..palette_array.len() {
-        let color: Rgb<u8>;        
-        let free = match palette_array[index] {
-            Some(c) => {
-                color = c.clone();
-                ""
-            },
-            None => {
-                color = Rgb::<u8>([0,0,0]); // black
-                " (FREE)"
-            }
-        };
-        let wcolor = widen_color(&color);
-        println!("    DB    0{:02X}H,0{:02X}H,0{:02X}H  ; {:03} 0{:02x}H:  {:x} {:x} {:x}{}",
-            wcolor[0], wcolor[1], wcolor[2], // R G B
-            index, index,
-            color[0], color[1], color[2], // R G B
-            free);
-    }
-    println!("end_palette_table:\n");
-
-    // For each PNG file, convert its pixels to palette indexes, and write to indexed output file.
+    // For each PNG file, convert its pixels to palette indexes, and write to binary output file.
     // Also, write the widened RGB colors to a separate file.
     //
     for img_file in &mut files {
@@ -584,7 +608,7 @@ fn main() {
                                 let indexes = palette_map.get(&color).unwrap();
                                 let index = indexes[0];
 
-                                // output some color index
+                                // output some color index or color value
                                 if img_file.bpp > 4 {
                                     output_data.push(index);
                                 } else {
@@ -712,7 +736,10 @@ fn main() {
                                     let index = indexes[0];
        
                                     // output some color index
-                                    if img_file.bpp > 4 {
+                                    if img_file.bpp == 8 {
+                                        let transparency = a << 6;
+                                        output_data.push(index|transparency);
+                                    } else if img_file.bpp > 4 {
                                         output_data.push(index);
                                     } else {
                                         output_byte = (output_byte << img_file.bpp) | index;
@@ -796,39 +823,41 @@ fn main() {
         }
     }
 
-    // Write the palette data to a file.
-    let mut palette_bytes: Vec<u8> = vec![];
+    if dump_palette {
+        // Write the palette data to a file.
+        let mut palette_bytes: Vec<u8> = vec![];
 
-    // standard and custom colors
-    for index in 0..palette_array.len() {
-        match palette_array[index] {
-            Some(color) => {
-                palette_bytes.push(color[0]); // R
-                palette_bytes.push(color[1]); // G
-                palette_bytes.push(color[2]); // B
-            },
-            None => {
-                palette_bytes.push(0);
-                palette_bytes.push(0);
-                palette_bytes.push(0);
-            }
-        }
-    }
-
-    let uc_path = "PALETTE.BIN".to_string();
-    match fs::File::create(uc_path.clone()) {
-        Ok(mut file) => {
-            match file.write_all(&palette_bytes[..]) {
-                Ok(()) => {
-                    println!("Wrote file ({}) as {} bytes.", uc_path, palette_bytes.len());
+        // standard and custom colors
+        for index in 0..palette_array.len() {
+            match palette_array[index] {
+                Some(color) => {
+                    palette_bytes.push(color[0]); // R
+                    palette_bytes.push(color[1]); // G
+                    palette_bytes.push(color[2]); // B
                 },
-                Err(err) => {
-                    println!("ERROR: Cannot write palette file ({}): {}", uc_path, err.to_string());
+                None => {
+                    palette_bytes.push(0);
+                    palette_bytes.push(0);
+                    palette_bytes.push(0);
                 }
             }
-        },
-        Err(err) => {
-            println!("ERROR: Cannot open palette file ({}): {}", uc_path, err.to_string());
+        }
+
+        let uc_path = "PALETTE.BIN".to_string();
+        match fs::File::create(uc_path.clone()) {
+            Ok(mut file) => {
+                match file.write_all(&palette_bytes[..]) {
+                    Ok(()) => {
+                        println!("Wrote file ({}) as {} bytes.", uc_path, palette_bytes.len());
+                    },
+                    Err(err) => {
+                        println!("ERROR: Cannot write palette file ({}): {}", uc_path, err.to_string());
+                    }
+                }
+            },
+            Err(err) => {
+                println!("ERROR: Cannot open palette file ({}): {}", uc_path, err.to_string());
+            }
         }
     }
 
