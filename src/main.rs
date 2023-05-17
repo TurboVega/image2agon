@@ -399,7 +399,7 @@ fn main() {
                                 return;
                             }
                             if img_file.bpp == 8 {
-                                let index = (r<<4)|(g<<2)|b;
+                                let index = (b<<4)|(g<<2)|r;
                                 img_file.colors.insert(color, index);    
                             } else {
                                 let index = (img_file.colors.len() + 1) as u8;
@@ -426,7 +426,7 @@ fn main() {
                                     return;
                                 }
                                 if img_file.bpp == 8 {
-                                    let index = (r<<4)|(g<<2)|b;
+                                    let index = (b<<4)|(g<<2)|r;
                                     img_file.colors.insert(color, index);    
                                 } else {
                                     let index = (img_file.colors.len() + 1) as u8;
@@ -463,20 +463,28 @@ fn main() {
         dump_palette |= img_file.bpp != 8;
         for color in img_file.colors.keys() {
             if !palette_map.contains_key(color) {
-                let mut found = false;
-                for palette_index in next_index..256 {
-                    if palette_array[palette_index].is_none() {
-                        palette_array[palette_index] = Some(color.clone());
-                        let mut indexes: Vec<u8> = vec![];
-                        indexes.push(palette_index as u8);
-                        palette_map.insert(color.clone(), indexes);            
-                        found = true;
-                        break;
+                if dump_palette {
+                    let mut found = false;
+                    for palette_index in next_index..256 {
+                        if palette_array[palette_index].is_none() {
+                            palette_array[palette_index] = Some(color.clone());
+                            let mut indexes: Vec<u8> = vec![];
+                            indexes.push(palette_index as u8);
+                            palette_map.insert(color.clone(), indexes);            
+                            found = true;
+                            break;
+                        }
                     }
-                }
-                if !found {
-                    println!("ERROR: Could not insert all colors into palette (please reduce colors)");
-                    return;
+                    if !found {
+                        println!("ERROR: Could not insert all colors into palette (please reduce colors)");
+                        return;
+                    }
+                } else {
+                    let index = (color[0]<<4)|(color[1]<<2)|color[2];
+                    palette_array[index as usize] = Some(color.clone());
+                    let mut indexes: Vec<u8> = vec![];
+                    indexes.push(index);
+                    palette_map.insert(color.clone(), indexes);            
                 }
             }        
         }    
@@ -607,6 +615,7 @@ fn main() {
 
                                 let indexes = palette_map.get(&color).unwrap();
                                 let index = indexes[0];
+                                print!("({} {} {} {}) ",r,g,b,index);
 
                                 // output some color index or color value
                                 if img_file.bpp > 4 {
@@ -734,7 +743,8 @@ fn main() {
     
                                     let indexes = palette_map.get(&color).unwrap();
                                     let index = indexes[0];
-       
+                                    print!("({} {} {} {}) ",r,g,b,index);
+
                                     // output some color index
                                     if img_file.bpp == 8 {
                                         let transparency = a << 6;
