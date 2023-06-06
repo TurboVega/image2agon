@@ -115,7 +115,7 @@ impl Expectations {
 }
 
 fn main() {
-    println!("Image to Agon (PNG-to-Agon-binary file convertor) V1.1");
+    println!("Image to Agon (PNG-to-Agon-binary file convertor) V1.2");
 
     // Determine which directories to use.
     let mut directories: Vec<DirParameters> = vec![];
@@ -324,6 +324,7 @@ fn main() {
                                         _ => {}
                                     }
                                     params.size = width * params.height;
+                                    params.path = pathname;
                                                                         
                                     files.push(params);
                                 }
@@ -615,7 +616,7 @@ fn main() {
 
                                 let indexes = palette_map.get(&color).unwrap();
                                 let index = indexes[0];
-                                print!("({} {} {} {}) ",r,g,b,index);
+                                //print!("({} {} {} {}) ",r,g,b,index);
 
                                 // output some color index or color value
                                 if img_file.bpp > 4 {
@@ -743,7 +744,7 @@ fn main() {
     
                                     let indexes = palette_map.get(&color).unwrap();
                                     let index = indexes[0];
-                                    print!("({} {} {} {}) ",r,g,b,index);
+                                    //print!("({} {} {} {}) ",r,g,b,index);
 
                                     // output some color index
                                     if img_file.bpp == 8 {

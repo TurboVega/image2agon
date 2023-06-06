@@ -1,4 +1,4 @@
-Image to Agon (PNG-to-Agon-binary file convertor) V1.0
+Image to Agon (PNG-to-Agon-binary file convertor) V1.2
 Reading: monochrome.png
 Reading: seq08.png
 Reading: seq16.png
@@ -7,13 +7,13 @@ Reading: seq64.png
 monochrome.png, 13x13, Rgba8
 File monochrome.png has 1 unique colors (maximum is 1).
 seq08.png, 8x96, Rgba8
-File seq08.png has 6 unique colors (maximum is 63).
+File seq08.png has 6 unique colors (maximum is 64).
 seq16.png, 16x192, Rgba8
-File seq16.png has 11 unique colors (maximum is 63).
+File seq16.png has 11 unique colors (maximum is 64).
 seq32.png, 32x384, Rgba8
-File seq32.png has 12 unique colors (maximum is 63).
+File seq32.png has 12 unique colors (maximum is 64).
 seq64.png, 64x768, Rgba8
-File seq64.png has 13 unique colors (maximum is 63).
+File seq64.png has 13 unique colors (maximum is 64).
 ; Palette entries by index:
 ;           Agon            Dec Hex:   R G B
 ;
@@ -21,16 +21,16 @@ begin_palette_table:
     DB    000H,000H,000H  ; 000 000H:  0 0 0 (FREE)
     DB    0FFH,0FFH,0FFH  ; 001 001H:  3 3 3
     DB    055H,000H,000H  ; 002 002H:  1 0 0
-    DB    055H,055H,000H  ; 003 003H:  1 1 0
-    DB    0AAH,055H,000H  ; 004 004H:  2 1 0
+    DB    0AAH,055H,000H  ; 003 003H:  2 1 0
+    DB    055H,055H,000H  ; 004 004H:  1 1 0
     DB    0FFH,000H,000H  ; 005 005H:  3 0 0
     DB    0FFH,055H,055H  ; 006 006H:  3 1 1
     DB    0AAH,000H,000H  ; 007 007H:  2 0 0
-    DB    055H,0AAH,000H  ; 008 008H:  1 2 0
-    DB    0FFH,0AAH,0AAH  ; 009 009H:  3 2 2
-    DB    0FFH,000H,055H  ; 010 00aH:  3 0 1
-    DB    0AAH,0AAH,000H  ; 011 00bH:  2 2 0
-    DB    000H,000H,000H  ; 012 00cH:  0 0 0
+    DB    0FFH,000H,055H  ; 008 008H:  3 0 1
+    DB    055H,0AAH,000H  ; 009 009H:  1 2 0
+    DB    0FFH,0AAH,0AAH  ; 010 00aH:  3 2 2
+    DB    000H,000H,000H  ; 011 00bH:  0 0 0
+    DB    0AAH,0AAH,000H  ; 012 00cH:  2 2 0
     DB    000H,055H,000H  ; 013 00dH:  0 1 0
     DB    0AAH,0AAH,055H  ; 014 00eH:  2 2 1
     DB    0FFH,055H,0AAH  ; 015 00fH:  3 1 2
