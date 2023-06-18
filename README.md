@@ -1,8 +1,9 @@
 # image2agon
 Converts PNG files to binary data for AgonLight (TM) usage.
 
-This document is for version V1.2 of the program.
+This document is for version V1.3 of the program.
 
+V1.3 - conditional compilation for unix target family vs. windows<br>
 V1.2 - fix crash bug when no filenames are given<br>
 V1.1 - output 8-bit data as an option<br>
 V1.0 - initial upload<br>

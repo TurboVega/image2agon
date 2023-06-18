@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'image2agon'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=image2agon",
+                    "--package=image2agon"
+                ],
+                "filter": {
+                    "name": "image2agon",
+                    "kind": "bin"
+                }
+            },
+            "args": ["d:\\AgonLight2\\agon_tmc\\scene.tmd"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'image2agon'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=image2agon",
+                    "--package=image2agon"
+                ],
+                "filter": {
+                    "name": "image2agon",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

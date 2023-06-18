@@ -28,9 +28,24 @@ use std::{env, vec};
 use std::collections::HashMap;
 use image::Rgb;
 
+#[cfg(target_family = "unix")]
 const IMG_R: usize = 0;
+
+#[cfg(target_family = "unix")]
 const IMG_G: usize = 1;
+
+#[cfg(target_family = "unix")]
 const IMG_B: usize = 2;
+
+#[cfg(target_family = "windows")]
+const IMG_R: usize = 2;
+
+#[cfg(target_family = "windows")]
+const IMG_G: usize = 1;
+
+#[cfg(target_family = "windows")]
+const IMG_B: usize = 0;
+
 const IMG_A: usize = 3;
 
 #[derive(Debug, Clone)]
@@ -115,7 +130,7 @@ impl Expectations {
 }
 
 fn main() {
-    println!("Image to Agon (PNG-to-Agon-binary file convertor) V1.2");
+    println!("Image to Agon (PNG-to-Agon-binary file convertor) V1.3");
 
     // Determine which directories to use.
     let mut directories: Vec<DirParameters> = vec![];
@@ -526,6 +541,7 @@ fn main() {
         if img_file.vapor || img_file.no_output {
             continue; // skip it
         }
+        println!("\n---{}---\n", img_file.path);
         let img = image::open(img_file.path.clone()).unwrap();
 
         // Get dimensions for input image.
@@ -616,7 +632,9 @@ fn main() {
 
                                 let indexes = palette_map.get(&color).unwrap();
                                 let index = indexes[0];
-                                //print!("({} {} {} {}) ",r,g,b,index);
+                                //print!("<{} {} {} / {} {} {} {}> ",
+                                //pixel[IMG_R],pixel[IMG_G],pixel[IMG_B],
+                                //r,g,b,index);
 
                                 // output some color index or color value
                                 if img_file.bpp > 4 {
@@ -744,8 +762,10 @@ fn main() {
     
                                     let indexes = palette_map.get(&color).unwrap();
                                     let index = indexes[0];
-                                    //print!("({} {} {} {}) ",r,g,b,index);
-
+                                    //print!("({} {} {} / {} {} {} {}) ",
+                                    //pixel[IMG_R],pixel[IMG_G],pixel[IMG_B],
+                                    //r,g,b,index);
+    
                                     // output some color index
                                     if img_file.bpp == 8 {
                                         let transparency = a << 6;
