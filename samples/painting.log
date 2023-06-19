@@ -1,7 +1,10 @@
-Image to Agon (PNG-to-Agon-binary file convertor) V1.2
+Image to Agon (PNG-to-Agon-binary file convertor) V1.3
 Reading: painting.png
 painting.png, 273x284, Rgb8
-File painting.png has 15 unique colors (maximum is 64).
+File painting.png has 16 unique colors (maximum is 64).
+
+---painting.png---
+
 Wrote file (PAINTING.BIN) as 76800 bytes.
 Wrote RGB file (PAINTING.BIN.RGB) as 230400 bytes.
 

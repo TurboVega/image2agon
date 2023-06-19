@@ -404,9 +404,9 @@ fn main() {
                 for y in 0..height {
                     for x in 0..width {
                         let pixel = rgba.get_pixel(x, y);
-                        let r = pixel[IMG_R] >> 6;
-                        let g = pixel[IMG_G] >> 6;
-                        let b = pixel[IMG_B] >> 6;
+                        let r = convert_color(pixel[IMG_R]);
+                        let g = convert_color(pixel[IMG_G]);
+                        let b = convert_color(pixel[IMG_B]);
                         let color = Rgb::<u8>([r, g, b]);
                         if !img_file.colors.contains_key(&color) {
                             if img_file.colors.len() >= img_file.max_colors {
@@ -429,11 +429,11 @@ fn main() {
                 for y in 0..height {
                     for x in 0..width {
                         let pixel = rgba.get_pixel(x, y);
-                        let a = pixel[IMG_A] >> 6;
+                        let a = convert_color(pixel[IMG_A]);
                         if a > 0 {
-                            let r = pixel[IMG_R] >> 6;
-                            let g = pixel[IMG_G] >> 6;
-                            let b = pixel[IMG_B] >> 6;
+                            let r = convert_color(pixel[IMG_R]);
+                            let g = convert_color(pixel[IMG_G]);
+                            let b = convert_color(pixel[IMG_B]);
                             let color = Rgb::<u8>([r, g, b]);
                             if !img_file.colors.contains_key(&color) {
                                 if img_file.colors.len() >= img_file.max_colors {
@@ -477,8 +477,8 @@ fn main() {
     let next_index: usize = 1;
     for img_file in &mut files {
         dump_palette |= img_file.bpp != 8;
-        for color in img_file.colors.keys() {
-            if !palette_map.contains_key(color) {
+        for (color, index) in &img_file.colors {
+            if !palette_map.contains_key(&color) {
                 if dump_palette {
                     let mut found = false;
                     for palette_index in next_index..256 {
@@ -496,13 +496,12 @@ fn main() {
                         return;
                     }
                 } else {
-                    let index = (color[0]<<4)|(color[1]<<2)|color[2];
-                    palette_array[index as usize] = Some(color.clone());
+                    palette_array[(*index) as usize] = Some(color.clone());
                     let mut indexes: Vec<u8> = vec![];
-                    indexes.push(index);
+                    indexes.push(*index);
                     palette_map.insert(color.clone(), indexes);            
                 }
-            }        
+            } 
         }    
     }
 
@@ -620,9 +619,9 @@ fn main() {
                                 }
                             } else {
                                 let pixel = rgb.get_pixel(img_x as u32, img_y as u32);
-                                let r = pixel[IMG_R] >> 6;
-                                let g = pixel[IMG_G] >> 6;
-                                let b = pixel[IMG_B] >> 6;
+                                let r = convert_color(pixel[IMG_R]);
+                                let g = convert_color(pixel[IMG_G]);
+                                let b = convert_color(pixel[IMG_B]);
                                 let color = Rgb::<u8>([r, g, b]);
 
                                 let wcolor = widen_color(&color);
@@ -748,11 +747,11 @@ fn main() {
                                 }
                             } else {
                                 let pixel = rgba.get_pixel(img_x as u32, img_y as u32);
-                                let a = pixel[IMG_A] >> 6;
+                                let a = convert_color(pixel[IMG_A]);
                                 if a > 0 {
-                                    let r = pixel[IMG_R] >> 6;
-                                    let g = pixel[IMG_G] >> 6;
-                                    let b = pixel[IMG_B] >> 6;
+                                    let r = convert_color(pixel[IMG_R]);
+                                    let g = convert_color(pixel[IMG_G]);
+                                    let b = convert_color(pixel[IMG_B]);
                                     let color = Rgb::<u8>([r, g, b]);
     
                                     let wcolor = widen_color(&color);
@@ -893,6 +892,14 @@ fn main() {
     }
 
     show_memory_map(&mut files);
+}
+
+fn convert_color(color: u8) -> u8 {
+    if color >= 0xC0 {
+        0x03
+    } else {
+        (color + 0x20) >> 6
+    }
 }
 
 fn upcase_filename(path: &str) -> String {
