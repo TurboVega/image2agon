@@ -28,24 +28,9 @@ use std::{env, vec};
 use std::collections::HashMap;
 use image::Rgb;
 
-#[cfg(target_family = "unix")]
 const IMG_R: usize = 0;
-
-#[cfg(target_family = "unix")]
 const IMG_G: usize = 1;
-
-#[cfg(target_family = "unix")]
 const IMG_B: usize = 2;
-
-#[cfg(target_family = "windows")]
-const IMG_R: usize = 2;
-
-#[cfg(target_family = "windows")]
-const IMG_G: usize = 1;
-
-#[cfg(target_family = "windows")]
-const IMG_B: usize = 0;
-
 const IMG_A: usize = 3;
 
 #[derive(Debug, Clone)]

@@ -20,22 +20,22 @@ File seq64.png has 16 unique colors (maximum is 64).
 begin_palette_table:
     DB    000H,000H,000H  ; 000 000H:  0 0 0 (FREE)
     DB    0FFH,0FFH,0FFH  ; 001 001H:  3 3 3
-    DB    055H,000H,0AAH  ; 002 002H:  1 0 2
-    DB    000H,000H,0FFH  ; 003 003H:  0 0 3
-    DB    055H,055H,0FFH  ; 004 004H:  1 1 3
-    DB    000H,000H,055H  ; 005 005H:  0 0 1
-    DB    055H,000H,0FFH  ; 006 006H:  1 0 3
-    DB    000H,055H,0AAH  ; 007 007H:  0 1 2
-    DB    0AAH,055H,0FFH  ; 008 008H:  2 1 3
-    DB    000H,000H,0AAH  ; 009 009H:  0 0 2
-    DB    0AAH,0AAH,0FFH  ; 010 00aH:  2 2 3
-    DB    000H,0AAH,0AAH  ; 011 00bH:  0 2 2
-    DB    000H,055H,0FFH  ; 012 00cH:  0 1 3
+    DB    0FFH,000H,000H  ; 002 002H:  3 0 0
+    DB    055H,000H,000H  ; 003 003H:  1 0 0
+    DB    0AAH,000H,000H  ; 004 004H:  2 0 0
+    DB    0AAH,000H,055H  ; 005 005H:  2 0 1
+    DB    0FFH,000H,055H  ; 006 006H:  3 0 1
+    DB    0FFH,055H,0AAH  ; 007 007H:  3 1 2
+    DB    0AAH,055H,000H  ; 008 008H:  2 1 0
+    DB    0FFH,055H,055H  ; 009 009H:  3 1 1
+    DB    0FFH,0AAH,0AAH  ; 010 00aH:  3 2 2
+    DB    0AAH,0AAH,000H  ; 011 00bH:  2 2 0
+    DB    055H,055H,000H  ; 012 00cH:  1 1 0
     DB    000H,000H,000H  ; 013 00dH:  0 0 0
-    DB    000H,055H,055H  ; 014 00eH:  0 1 1
-    DB    055H,0AAH,0FFH  ; 015 00fH:  1 2 3
-    DB    000H,0AAH,055H  ; 016 010H:  0 2 1
-    DB    000H,0FFH,0AAH  ; 017 011H:  0 3 2
+    DB    0FFH,055H,000H  ; 014 00eH:  3 1 0
+    DB    0FFH,0AAH,055H  ; 015 00fH:  3 2 1
+    DB    055H,0AAH,000H  ; 016 010H:  1 2 0
+    DB    0AAH,0FFH,000H  ; 017 011H:  2 3 0
     DB    000H,000H,000H  ; 018 012H:  0 0 0 (FREE)
     DB    000H,000H,000H  ; 019 013H:  0 0 0 (FREE)
     DB    000H,000H,000H  ; 020 014H:  0 0 0 (FREE)
