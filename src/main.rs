@@ -115,7 +115,7 @@ impl Expectations {
 }
 
 fn main() {
-    println!("Image to Agon (PNG-to-Agon-binary file convertor) V1.3");
+    println!("Image to Agon (PNG-to-Agon-binary file convertor) V1.5");
 
     // Determine which directories to use.
     let mut directories: Vec<DirParameters> = vec![];
@@ -414,8 +414,8 @@ fn main() {
                 for y in 0..height {
                     for x in 0..width {
                         let pixel = rgba.get_pixel(x, y);
-                        let a = convert_color(pixel[IMG_A]);
-                        if a > 0 {
+                        //let a = convert_color(pixel[IMG_A]);
+                        /*if a > 0*/ {
                             let r = convert_color(pixel[IMG_R]);
                             let g = convert_color(pixel[IMG_G]);
                             let b = convert_color(pixel[IMG_B]);
@@ -608,6 +608,9 @@ fn main() {
                                 let g = convert_color(pixel[IMG_G]);
                                 let b = convert_color(pixel[IMG_B]);
                                 let color = Rgb::<u8>([r, g, b]);
+                                //if img_x==10 && img_y==10 {
+                                //    println!("{},{}: {:?} {:?}", img_x, img_y, pixel, color);
+                                //}
 
                                 let wcolor = widen_color(&color);
                                 output_data_rgb.push(wcolor[0]);
@@ -733,11 +736,14 @@ fn main() {
                             } else {
                                 let pixel = rgba.get_pixel(img_x as u32, img_y as u32);
                                 let a = convert_color(pixel[IMG_A]);
-                                if a > 0 {
+                                /*if a > 0*/ {
                                     let r = convert_color(pixel[IMG_R]);
                                     let g = convert_color(pixel[IMG_G]);
                                     let b = convert_color(pixel[IMG_B]);
                                     let color = Rgb::<u8>([r, g, b]);
+                                    //if img_x==10 && img_y==10 {
+                                    //    println!("{},{}: {:?} {:?} {:?}", img_x, img_y, a, pixel, color);
+                                    //}
     
                                     let wcolor = widen_color(&color);
                                     output_data_rgb.push(wcolor[0]);
@@ -765,7 +771,7 @@ fn main() {
                                             bits_used = 0;
                                         }    
                                     }
-                                } else {
+                                } /*else {
                                     // output transparent color index (zero)
                                     output_data_rgb.push(0);
                                     output_data_rgb.push(0);
@@ -782,7 +788,7 @@ fn main() {
                                             bits_used = 0;
                                         }    
                                     }
-                                }
+                                }*/
                             }
                         }    
                     }
@@ -880,11 +886,7 @@ fn main() {
 }
 
 fn convert_color(color: u8) -> u8 {
-    if color >= 0xC0 {
-        0x03
-    } else {
-        (color + 0x20) >> 6
-    }
+    color >> 6
 }
 
 fn upcase_filename(path: &str) -> String {

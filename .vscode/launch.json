@@ -19,7 +19,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["d:\\AgonLight2\\agon_tmc\\scene.tmd"],
+            "args": ["D:\\AgonLight2\\agon_crayon\\samples\\pct33.png"],
             "cwd": "${workspaceFolder}"
         },
         {
